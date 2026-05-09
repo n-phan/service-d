@@ -91,6 +91,20 @@ def health():
     return {"status": "ok", "service": "service-d"}
 
 
+@app.post("/configure")
+async def configure(body: dict):
+    """Toggle DB_FAIL at runtime without restarting the container."""
+    os.environ["DB_FAIL"] = "1" if body.get("db_fail") else "0"
+    return {"db_fail": os.environ["DB_FAIL"] == "1"}
+
+
+@app.post("/reset")
+async def reset_config():
+    """Restore service-d to its default (no failure injection)."""
+    os.environ["DB_FAIL"] = "0"
+    return {"db_fail": False}
+
+
 @app.get("/metrics")
 def metrics():
     """Expose Prometheus metrics in text/plain format."""
